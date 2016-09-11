@@ -2,8 +2,11 @@ package com.smochin.common.rest.client.callable;
 
 import com.smochin.common.rest.client.callable.handler.ChunkHandler;
 import com.smochin.common.rest.client.response.HttpResponse;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 import javax.ws.rs.client.Invocation;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.Cookie;
@@ -15,6 +18,7 @@ public abstract class Callable<T> {
 
     private WebTarget target;
     private List<Cookie> cookies;
+    private Map<String, Object> headers;
     private ChunkHandler chunkHandler;
 
     public Callable(WebTarget target) {
@@ -23,7 +27,11 @@ public abstract class Callable<T> {
 
     public HttpResponse call() {
         Invocation.Builder builder = target.request();
-        javax.ws.rs.core.Response r = onCall(builder);
+        
+        builder = fillCookies(builder);
+        builder = fillHeaders(builder);
+        
+        Response r = onCall(builder);
         if (null != chunkHandler) {
             GenericType<ChunkedInput<String>> genericType = new GenericType<ChunkedInput<String>>(){};
             ChunkedInput<String> input = r.readEntity(genericType);
@@ -59,25 +67,54 @@ public abstract class Callable<T> {
     }
 
     public final T cookie(String name, String value, String path, String domain) {
-        cookies.add(new Cookie(name, value, path, domain));
+        cookies().add(new Cookie(name, value, path, domain));
         return (T) this;
     }
 
     public final T cookie(String name, String value) {
-        cookies.add(new Cookie(name, value));
+        cookies().add(new Cookie(name, value));
         return (T) this;
+    }
+    
+    private List<Cookie> cookies() {
+        if(Objects.isNull(cookies)) {
+            cookies = Collections.EMPTY_LIST;
+        }
+        return cookies;
     }
     
     public final T header(String name, String value) {
+        headers().put(name, value);
         return (T) this;
     }
     
-    public final T headers(Map<String, String[]> query) {
+    public final T headers(final Map<String, String[]> headers) {
+        headers().putAll(headers);
         return (T) this;
     }
+    
+    private Map headers() {
+        if(Objects.isNull(headers)) {
+            headers = Collections.EMPTY_MAP;
+        }
+        return headers;
+    }
 
-    public void pathVar(String name, String name0) {
+    private Invocation.Builder fillCookies(final Invocation.Builder builder) {
+        Invocation.Builder newBuilder = builder;
+        for(Cookie cookie: cookies()) {
+            newBuilder = newBuilder.cookie(cookie);
+        }
+        return newBuilder;
+    }
 
+    private Invocation.Builder fillHeaders(final Invocation.Builder builder) {
+        Invocation.Builder newBuilder = builder;
+        Set<String> keys = headers().keySet();
+        for(String key: keys) {
+            newBuilder = newBuilder.header(key, headers().get(key));
+        }
+        return newBuilder;
     }
     
 }
