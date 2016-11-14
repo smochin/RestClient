@@ -2,7 +2,8 @@ package com.smochin.common.rest.client.callable;
 
 import com.smochin.common.rest.client.callable.handler.ChunkHandler;
 import com.smochin.common.rest.client.response.HttpResponse;
-import java.util.Collections;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -78,7 +79,7 @@ public abstract class Callable<T> {
     
     private List<Cookie> cookies() {
         if(Objects.isNull(cookies)) {
-            cookies = Collections.EMPTY_LIST;
+            cookies = new ArrayList<>();
         }
         return cookies;
     }
@@ -95,7 +96,7 @@ public abstract class Callable<T> {
     
     private Map headers() {
         if(Objects.isNull(headers)) {
-            headers = Collections.EMPTY_MAP;
+            headers = new HashMap<>();
         }
         return headers;
     }

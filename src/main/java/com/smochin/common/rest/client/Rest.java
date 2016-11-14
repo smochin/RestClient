@@ -3,6 +3,8 @@ package com.smochin.common.rest.client;
 import com.smochin.common.rest.client.callable.Post;
 import com.smochin.common.rest.client.callable.Get;
 import com.smochin.common.rest.client.callable.Delete;
+import com.smochin.common.rest.client.callable.Put;
+
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.WebTarget;
@@ -26,6 +28,12 @@ public class Rest {
         WebTarget target = client.target(url).path(path);
         Post post = new Post(target);
         return post;
+    }
+    
+    public Put put(String path) {
+        WebTarget target = client.target(url).path(path);
+        Put put = new Put(target);
+        return put;
     }
     
     public Delete delete(String path) {
