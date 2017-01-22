@@ -6,11 +6,13 @@ public class HttpResponse {
     private int status;
     private Map<String, String> headers;
     private String entity;
-
+    
+    
     public HttpResponse(int status, String entity, Map h) {
         setStatus(status);
         setEntity(entity);
         setHeaders(headers);
+        init();
     }
 
     public int getStatus() {
@@ -39,5 +41,9 @@ public class HttpResponse {
     
     public Object getEntityAsJson() {
         return getEntity();
+    }
+    
+    private void init() {
+    	
     }
 }

@@ -8,7 +8,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+
+import javax.ws.rs.ProcessingException;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.client.Invocation;
+import javax.ws.rs.client.ResponseProcessingException;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.Cookie;
 import javax.ws.rs.core.GenericType;
@@ -32,23 +36,41 @@ public abstract class Callable<T> {
         builder = fillCookies(builder);
         builder = fillHeaders(builder);
         
-        Response r = onCall(builder);
-        if (null != chunkHandler) {
-            GenericType<ChunkedInput<String>> genericType = new GenericType<ChunkedInput<String>>(){};
-            ChunkedInput<String> input = r.readEntity(genericType);
-            String chunk;
-            while ((chunk = input.read()) != null) {
-                chunkHandler.handle(chunk);
-            }
-        }
-        int status = r.getStatus();
-        String entity = r.readEntity(String.class);
-        Map h = r.getHeaders();
-        HttpResponse response = new HttpResponse(status, entity, h);
+        Response r = null;
+        HttpResponse response = null;
+        try {
+			r = onCall(builder);
+			if (null != chunkHandler) {
+	            GenericType<ChunkedInput<String>> genericType = new GenericType<ChunkedInput<String>>(){};
+	            ChunkedInput<String> input = r.readEntity(genericType);
+	            String chunk;
+	            while ((chunk = input.read()) != null) {
+	                chunkHandler.handle(chunk);
+	            }
+	        }
+	        int status = r.getStatus();
+	        String entity = r.readEntity(String.class);
+	        Map h = r.getHeaders();
+	        response = new HttpResponse(status, entity, h);
+	        
+		} catch (ResponseProcessingException e) {
+			//Erro de
+			
+		} catch (ProcessingException e) {
+			//Erro de I/O
+			
+		} catch (WebApplicationException e) {
+			//Erro de 
+			
+		} catch (Exception e) {
+			//Erro generico
+		}
+        
+        
         return response;
     }
 
-    public abstract Response onCall(Invocation.Builder builder);
+    protected abstract Response onCall(Invocation.Builder builder) throws ResponseProcessingException, ProcessingException, WebApplicationException, Exception;
 
     public void chunkHandler(ChunkHandler ch) {
         this.chunkHandler = ch;

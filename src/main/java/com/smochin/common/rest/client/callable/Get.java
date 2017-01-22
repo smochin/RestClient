@@ -4,7 +4,7 @@ import javax.ws.rs.client.Invocation;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.Response;
 
-public class Get extends Callable<Get> {
+public class Get extends Callable<Get>  {
 
     public Get(WebTarget target) {
         super(target);
